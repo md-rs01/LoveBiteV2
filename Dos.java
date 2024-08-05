@@ -145,25 +145,27 @@ public class Dos implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
-        try {
-            while (true) {
-                switch (this.type) {
-                    case 3:
-                        getAttack(Dos.url);
-                        break;
-                    case 4:
-                        sslGetAttack(Dos.url);
-                        break;
-                }
+@Override
+public void run() {
+    try {
+        while (true) {
+            switch (this.type) {
+                case 3:
+                    getAttack(Dos.url);
+                    break;
+                case 4:
+                    sslGetAttack(Dos.url);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid attack type: " + this.type);
             }
-        } catch (IOException e) {
-            System.out.println(RED + "IO Error in thread: " + this.seq + " - " + e.getMessage() + RESET);
-        } catch (Exception e) {
-            System.out.println(RED + "Error in thread: " + this.seq + " - " + e.getMessage() + RESET);
         }
+    } catch (IOException e) {
+        System.out.println(RED + "IO Error in thread: " + this.seq + " - " + e.getMessage() + RESET);
+    } catch (Exception e) {
+        System.out.println(RED + "Error in thread: " + this.seq + " - " + e.getMessage() + RESET);
     }
+}
 
     private static void displayBanner() {
         String banner = "\n" +
