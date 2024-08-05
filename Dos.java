@@ -320,7 +320,3 @@ public void run() {
         // Clear resources
         con.disconnect();
     }
-
-
-//This is a modified by BoyFromBD.
-// t.me/heartcrafter
