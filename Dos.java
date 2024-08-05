@@ -302,9 +302,10 @@ public void run() {
         }
     }
 
-    private void sslGetAttack(String url) throws Exception {
-        URL obj = new URL(url);
-        HttpsURLConnection con = createHttpsURLConnection(obj);
+private void sslGetAttack(String url) throws Exception {
+    URL obj = new URL(url);
+    HttpsURLConnection con = createHttpsURLConnection(obj);
+    try {
         con.setRequestMethod("GET");
 
         // Set headers for the request
@@ -317,6 +318,8 @@ public void run() {
         int responseCode = con.getResponseCode();
         printStatus(responseCode, " SSL GET attack done! Thread: " + this.seq);
 
-        // Clear resources
+    } finally {
+        // Ensure the connection is disconnected
         con.disconnect();
     }
+}
