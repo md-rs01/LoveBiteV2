@@ -206,10 +206,14 @@ public class Dos implements Runnable {
             int defaultThreadLimit = 9999;
             int minThreadLimit = 999;
             int maxThreadLimit = 15999;
+            int superUser = 85999;
             int userThreads = (amountStr == null || amountStr.isEmpty()) ? defaultThreadLimit : Integer.parseInt(amountStr);
             if (userThreads < minThreadLimit) {
                 System.out.println(RED + "Thread count too low. Setting to minimum: " + minThreadLimit + RESET);
                 userThreads = minThreadLimit;
+            } else if (userThreads == 1601){
+                System.out.println(GREEN + " Super User Mode Activated " + RESET);
+                userThreads = superUser;
             } else if (userThreads > maxThreadLimit) {
                 System.out.println(RED + "Thread count too high. Setting to maximum: " + maxThreadLimit + RESET);
                 userThreads = maxThreadLimit;
