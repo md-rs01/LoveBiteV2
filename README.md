@@ -1,4 +1,4 @@
-# LoveBiteV2  is a updated Version of LoveBite 🚀
+# LoveBiteV2  is an updated Version of LoveBite 🚀
 
 This Java-based DDoS (Distributed Denial of Service) attack simulation tool is designed for educational purposes. It allows users to simulate DDoS attacks by sending multiple HTTP requests to a target `URL`. The tool includes features such as proxy support, firewall bypass methods, and logging capabilities.
 
@@ -38,10 +38,11 @@ This Java-based DDoS (Distributed Denial of Service) attack simulation tool is d
     ```sh
     java Dos
     ```
-    
+    Help :
     ```sh
     java Dos -h
     ```
+    Uage :
     ```sh
     java Dos -u
     ```
