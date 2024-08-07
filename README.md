@@ -38,11 +38,11 @@ This Java-based DDoS (Distributed Denial of Service) attack simulation tool is d
     ```sh
     java Dos
     ```
-        Help :
+    Help :
     ```sh
     java Dos -h
     ```
-        Uage :
+    Uage :
     ```sh
     java Dos -u
     ```
