@@ -75,12 +75,12 @@ The tool logs attack details to *attack_log.txt*  with the following format:-
     Failed Requests: 10
     =========================================
 ```
-### Firewall Bypass Methods 🔓
+### Firewall Detect & Bypass Methods 🔓
 
-The tool includes basic firewall bypass techniques:- 
+The tool first detect firewall in that website anb then in will bypass it using X-Forward-For, Referers techniques:- 
 
 **Randomizing User-Agents:**
-To avoid detection by varying `user-agent` strings.Varying Request Methods: Switching between `GET` and `POST` requests.Using Proxies: To mask the origin of requests.
+To avoid detection by providing `X-Forward-For` `Referers` data in every requests.
 
 ### Code Structure 🏗️
 
