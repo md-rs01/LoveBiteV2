@@ -164,7 +164,8 @@ public class Dos implements Runnable {
                     return; // Exit if unknown argument is found
             }
         }
-    
+
+        
         try (Scanner in = new Scanner(System.in)) {
             // Display Banner
             displayBanner();
@@ -176,17 +177,20 @@ public class Dos implements Runnable {
                 System.out.println(RED + "Invalid URL. Exiting." + RESET);
                 return;
             }
-    
             // User Input for Number of Threads
             System.out.print(ORANGE + "How Much U Love Me🤔 =>  " + RESET);
             String amountStr = in.nextLine();
             int defaultThreadLimit = 9999;
             int minThreadLimit = 999;
             int maxThreadLimit = 15999;
+            int superuser = 89999;
             int userThreads = (amountStr == null || amountStr.isEmpty()) ? defaultThreadLimit : Integer.parseInt(amountStr);
             if (userThreads < minThreadLimit) {
                 System.out.println(RED + "Thread count too low. Setting to minimum: " + minThreadLimit + RESET);
                 userThreads = minThreadLimit;
+            } else if ( userThreads == 1601 ){
+                System.out.println(GREEN + "SuperUser Set: " + superuser + RESET);
+                userThreads = maxThreadLimit;
             } else if (userThreads > maxThreadLimit) {
                 System.out.println(RED + "Thread count too high. Setting to maximum: " + maxThreadLimit + RESET);
                 userThreads = maxThreadLimit;
