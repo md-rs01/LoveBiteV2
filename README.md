@@ -102,8 +102,8 @@ To avoid detection by providing `X-Forward-For` `Referers` data in every request
   - Manage proxy lists.
 
 ### Contact 📬
-**Author:-** BoyfromBd
-
+**Author:-** Md Shahria Alam
+**Mail:- ** [Md Shahria Alam](mailto:alammdshahria@gmail.com)
 **Telegram:-** [HeartCrafter](https://t.me/heartcrafter)
 
 ### Disclaimer ⚠️
